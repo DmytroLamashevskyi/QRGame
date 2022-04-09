@@ -3,10 +3,7 @@
 <style type="text/css">   
 .p4wn-black-square {
   background-color:#888;
-}   
-.p4wn-controls{
-  clear: both; 
-} 
+}    
 .p4wn-control-button {
   padding: 0px 5px;
   cursor: pointer;
@@ -18,40 +15,30 @@
 </style>
 </head>
 <body id="b"> 
-<script>
-var P4WN_SQUARE_WIDTH = 30;
-var P4WN_SQUARE_HEIGHT = 30;
-var P4WN_WRAPPER_CLASS = 'p4wn-wrapper';
-var P4WN_BOARD_CLASS = 'p4wn-board';
-var P4WN_MESSAGES_CLASS = 'p4wn-messages';
-var P4WN_LOG_CLASS = 'p4wn-log';
-var P4WN_CONTROLS_CLASS = 'p4wn-controls';
-var P4WN_BLACK_SQUARE = 'p4wn-black-square';
-var P4WN_WHITE_SQUARE = 'p4wn-white-square';
+<script> 
 
 var P4WN_ROTATE_BOARD = true;
-var P4WN_LEVELS = ['stupid', 'middling', 'default', 'slow', 'slowest'];
-var P4WN_DEFAULT_LEVEL = 2;
-var P4WN_ADAPTIVE_LEVELS = false;
+var P4WN_LEVELS = ['stupid', 'middling', 'default', 'slow', 'slowest']; 
 
-var P4WN_IMAGE_DIR = 'images';
+var P4WN_IMAGE_DIR = 'images'; 
 
-var P4WN_IMAGE_NAMES = [
-    'empty.gif',
+var P4WN_IMAGE_BASE64 = [
+    'R0lGODlhAQABAIAAAMDAwAAAACH5BAEAAAAALAAAAAABAAEAAAICRAEAOw==',
     '',   // 1 is unused
-    'white_pawn.gif',
-    'black_pawn.gif',
-    'white_rook.gif',
-    'black_rook.gif',
-    'white_knight.gif',
-    'black_knight.gif',
-    'white_bishop.gif',
-    'black_bishop.gif',
-    'white_king.gif',
-    'black_king.gif',
-    'white_queen.gif',
-    'black_queen.gif'
-]; 
+    'R0lGODlhHgAeAKEBAAAAAP///////////yH5BAEAAAIALAAAAAAeAB4AAAJjlI+py+2/gAQQzhBmZRL7TG0J8H2heHSlhI6q1qYqBrfzem53CaIkv/IBg6IdzvbjsWLGpc9Ic1qSw960enxQsTTtlitVQKthxBhbNpzJOTOXzHkP27KJ/Y5PC/L8fOwPuFAAADs=',
+    'R0lGODlhHgAeAIABAAAAAP///yH5BAEAAAEALAAAAAAeAB4AAAJHjI+py+2/gAQQzktrxFcr3nkIOIkJaY5kZq6l6IZa/M40W914HqeBm9J5dBIecbc5Po6yJLPBxDCiTRUVabgWndGp1gcOIwoAOw==',
+    'R0lGODlhHgAeAKEAAP///wAAAP///////yH5BAEAAAIALAAAAAAeAB4AAAJslI+py+0dojRyihoZDhT3qgXAWI2kZGZLlKIte4bmTNeqsuU6B4n1f3Pscg8E7AcIFo9AXrGDjD2hUeWDaXM+sTSr0If09qJJ7RLcnFLD5u8QdEaz24n37kvOhuxDnDw/Y8X35jeoo4aYqFYAADs=',
+    'R0lGODlhHgAeAKEAAP///wAAAP///////yH5BAEAAAIALAAAAAAeAB4AAAJZlI+py+0dojRyihoZDhT3qm3iGI6mpZwqt0jAC8cygLar91x3llPzzOrpVsKPqjg8FndI5vLWhD6Jy58smNvxHtqazWrd2rpihAscLifJ3jUba3zDkfT6ogAAOw==',
+    'R0lGODlhHgAeAKEBAAAAAP///////////yH5BAEAAAIALAAAAAAeAB4AAAKElI+pywnf4gMuwLiApVNvnAWb6G0XaHilSHbow8aySTWwNeduiOf+FFr5ZieE5hYTEmvGYe/HTClZSGgTOk1Gs5AsdaureVsHmIpUdpIFZ9ylamXLjmn1h106isff8vEuZweIByQlOKgwcYhYscjo5/iYEilJ2HGJWZiRyXmJ8gkaelAAADs=',
+    'R0lGODlhHgAeAKEAAP///wAAAP///////yH5BAEAAAIALAAAAAAeAB4AAAJulI+pyxnf4gtuRjZpzndtAEyh1R0PuJ0j1aXuSWLi+41ysNKZrcB6yqugPrqgqUgzCn44JMvAzAEhR9rSidBBsdum9xmlzr5d7hQcZhHFTG91Vf0ZN3E59dZ2N/LjPd/n96eU9afnURhTorjIWAAAOw==',
+    'R0lGODlhHgAeAKEBAAAAAP///////////yH5BAEAAAIALAAAAAAeAB4AAAJ2lI+pywsPmlQvhDezANZGLVXXBzYQWSanB6Ub1MUjlomx3dGhzPLXhMtxeDqH7LS67W7IIIriG0WfqumQGLoyfUVjlFvTfkeaIJdqGjZZriSrWxYLXa8ZDB7nVFp5t61JBXNm9nZAOGMgSBQBiETRyEcnOSlQAAA7',
+    'R0lGODlhHgAeAKEAAP///wAAAP///////yH5BAEAAAIALAAAAAAeAB4AAAJflI+pyxsfmlQQzivqw1NHLlUg44ljiX5dCQDohbZvGLszqbW67tHVvus1UrKbo5byeYqlVarpfGow0innBzSBAjwIb2SogjMPoE11YnJd12oy4XYf5GRp/Y0Qj/d8QwEAOw==',
+    'R0lGODlhHgAeAKEBAAAAAP///////////yH5BAEAAAIALAAAAAAeAB4AAAJ0lI+pywzQYnuynhcCtRFryElbKILcg6bqul5elqHwB8wx9drxXOuw7Pv1cj5icRcUJoVGXdPZW36kNyqN+uRBosnsz+CdLkdGFlCb8JjNt8VqrHKfrSkFcc392Jn4s8mlAhdnl0f3l5YiODLRV0eCRxK5UAAAOw==',
+    'R0lGODlhHgAeAKEAAP///wAAAP///////yH5BAEAAAIALAAAAAAeAB4AAAJ6lI+pyxzRYnuyngcetFHnzXVgKJKaAGnep6IoZWBqkNWyrX4vO9MfwJuxgr1fT3hMApNHYpPpgSKlOSqN6lRaKVdpNhrraqG68NcLu4h9wHa7OlKzycs0AnMulu9Bt78f94J39naSgLeFGCiY2OLQaCiyRcLYQ3mZUAAAOw==',
+    'R0lGODlhHgAeAKEAAP///wAAAP///////yH5BAEAAAIALAAAAAAeAB4AAAKalI+py+3PQoBNogDAPBZizWWb8I2VyEljuXSkepnqOrEGfOPvKs4hD7oFdzWZpth7DV85YC2Dsu1Sm5IEerTpSEeuCPuNYmTjaw9rznYvZ+gn3DYJ20d6Wq60w+94b28G+LbENgMGVti3Y7jo5qIgGFjo5lAmaKgymMAX+eb4mMUJmBmDyQiaOGe6iEpkeejzEBpJQTpLe+tQAAA7',
+    'R0lGODlhHgAeAKEAAP///wAAAP///////yH5BAEAAAIALAAAAAAeAB4AAAJ6lI+pyxzRYnuyngcetFHnzXVgKJKaAGnep6IoZWBqkNWyrX4vO9MfwJuxgr1fT3hMApNHYpPpgSKlOSqN6lRaKVdpNhrraqG68NcLu4h9wHa7OlKzycs0AnMulu9Bt78f94J39naSgLeFGCiY2OLQaCiyRcLYQ3mZUAAAOw=='
+];
+
 var P4WN_PROMOTION_STRINGS = ['queen', 'rook', 'knight', 'bishop'];
 var P4WN_PROMOTION_INTS = [P4_QUEEN, P4_ROOK, P4_KNIGHT, P4_BISHOP];
 
@@ -136,7 +123,7 @@ _p4d_proto.computer_move = function(){
     mv = state.findmove(depth);
     var delta = Date.now() - start_time;
     p4_log("findmove took", delta);
-    if (P4WN_ADAPTIVE_LEVELS && depth > 2){
+    if (false && depth > 2){
         var min_time = 25 * depth;
         while (delta < min_time){
             depth++;
@@ -157,13 +144,7 @@ _p4d_proto.display_move_text = function(moveno, string){
         mn = ((moveno >> 1) + 1) + ' ';
         while(mn.length < 4)
             mn = ' ' + mn;
-    }
-    this.log(mn + string, "p4wn-log-move",
-             function (p4d, n){
-                 return function(e){
-                     p4d.goto_move(n);
-                 };
-             }(this, moveno));
+    } 
 };
 
 _p4d_proto.log = function(msg, klass, onclick){
@@ -199,7 +180,7 @@ _p4d_proto.refresh = function(){
     for (var i = 20; i < 100; i++){
         if(board[i] != P4_EDGE){
             var j = this.orientation ? 119 - i : i;
-            pieces[j].src = P4WN_IMAGE_DIR + '/' + P4WN_IMAGE_NAMES[board[i]];
+            pieces[j].src = 'data:image/png;base64,' + P4WN_IMAGE_BASE64[board[i]];
         }
     }
 };
@@ -210,7 +191,7 @@ _p4d_proto.start_moving_piece = function(position){
     var img = this.elements.pieces[this.orientation ? 119 - position : position];
     this.elements.moving_img = img;
     img.style.position = 'fixed';
-    var yoffset = parseInt(P4WN_SQUARE_HEIGHT / 2);
+    var yoffset = parseInt(30 / 2);
     if (window.event){
         img.style.left = (window.event.clientX + 1) + "px";
         img.style.top = (window.event.clientY - yoffset) + "px";
@@ -252,7 +233,7 @@ _p4d_proto.write_board_html = function(){
         for(var x = 1;  x < 9; x++){
             var i = y * 10 + x;
             var td = p4d_new_child(tr, "td");
-            td.className = (x + y) & 1 ? P4WN_BLACK_SQUARE : P4WN_WHITE_SQUARE;
+            td.className = (x + y) & 1 ? 'p4wn-black-square' : 'p4wn-white-square';
             _add_event_listener(td, 'click',
                                 function(p4d, n){
                                     return function(e){
@@ -261,9 +242,9 @@ _p4d_proto.write_board_html = function(){
                                 }(this, i));
             var img = p4d_new_child(td, "img");
             pieces[i] = img;
-            img.src = P4WN_IMAGE_DIR + '/' + P4WN_IMAGE_NAMES[0];
-            img.width= P4WN_SQUARE_WIDTH;
-            img.height= P4WN_SQUARE_HEIGHT;
+            img.src = 'data:image/png;base64,' + P4WN_IMAGE_BASE64[0];
+            img.width= 30;
+            img.height= 30;
         }
     }
 };
@@ -486,20 +467,20 @@ function P4wn_display(target){
         container = target.get(0);
     else
         container = target;
-    var inner = p4d_new_child(container, "div", P4WN_WRAPPER_CLASS);
+    var inner = p4d_new_child(container, "div", 'p4wn-wrapper');
     this.elements = {};
     this.elements.inner = inner;
     this.elements.container = container;
-    var board = this.elements.board = p4d_new_child(inner, "div", P4WN_BOARD_CLASS);
-    var log = this.elements.log = p4d_new_child(inner, "div", P4WN_LOG_CLASS);
-    this.elements.messages = p4d_new_child(inner, "div", P4WN_MESSAGES_CLASS);
-    this.elements.controls = p4d_new_child(container, "div", P4WN_CONTROLS_CLASS);
+    var board = this.elements.board = p4d_new_child(inner, "div", 'p4wn-board');
+    var log = this.elements.log = p4d_new_child(inner, "div", 'p4wn-log');
+    this.elements.messages = p4d_new_child(inner, "div", 'p4wn-messages');
+    this.elements.controls = p4d_new_child(container, "div", 'p4wn-controls');
     this.start = 0;
     this.draw_offers = 0;
     this.board_state = p4_new_game();
-    this.players = ['human', 'computer']; //[white, black] controllers
-    this.pawn_becomes = 0; //index into P4WN_PROMOTION_* arrays
-    this.computer_level = P4WN_DEFAULT_LEVEL;
+    this.players = ['human', 'computer']; 
+    this.pawn_becomes = 0; 
+    this.computer_level = 2;
     this.buttons = {
         elements: [],
         refreshers: []
@@ -511,11 +492,11 @@ function P4wn_display(target){
 function p4wnify(id){
     var p4d = new P4wn_display(id);
     var e = p4d.elements;
-    var board_height = (8 * (P4WN_SQUARE_HEIGHT + 3)) + 'px';
+    var board_height = (8 * (30 + 3)) + 'px';
     e.inner.style.height = board_height;
     e.log.style.height = board_height;
     e.board.style.height = board_height;
-    e.controls.style.width = (15 * P4WN_SQUARE_WIDTH) + 'px';
+    e.controls.style.width = (15 * 30) + 'px';
     p4d.write_board_html();
     p4d.write_controls_html(P4WN_CONTROLS);
     p4d.interpret_query_string();
@@ -564,27 +545,19 @@ var P4_KING_VALUE = P4_VALUES[10];
 var P4_WIN = P4_KING_VALUE >> 1;
  
 var P4_WIN_DECAY = 300;
-var P4_WIN_NOW = P4_KING_VALUE - 250;
-
-/* P4_{MAX,MIN}_SCORE should be beyond any possible evaluated score */
-
-var P4_MAX_SCORE = 9999;    // extremes of evaluation range
-var P4_MIN_SCORE = -P4_MAX_SCORE;
-
-/*initialised in p4_initialise_state */
+var P4_WIN_NOW = P4_KING_VALUE - 250;  
+var P4_MAX_SCORE = 9999;    
+var P4_MIN_SCORE = -9999; 
 var P4_CENTRALISING_WEIGHTS;
 var P4_BASE_PAWN_WEIGHTS;
 var P4_KNIGHT_WEIGHTS;
 
 /*P4_DEBUG turns on debugging features */
 var P4_DEBUG = 0;
-var P4_INITIAL_BOARD = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 1 1";
-
-/*use javascript typed arrays rather than plain arrays
- * (faster in some browsers, unsupported in others, possibly slower elsewhere) */
+var P4_INITIAL_BOARD = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 1 1"; 
 var P4_USE_TYPED_ARRAYS = this.Int32Array !== undefined;
 
-var P4_PIECE_LUT = { /*for FEN, PGN interpretation */
+var P4_PIECE_LUT = { 
     P: 2,
     p: 3,
     R: 4,
@@ -616,7 +589,7 @@ function p4_alphabeta_treeclimber(state, count, colour, score, s, e, alpha, beta
             var mscore = mv[0];
             var ms = mv[1];
             var me = mv[2];
-            if (mscore > P4_WIN){ //we won! Don't look further.
+            if (mscore > P4_WIN){ 
                 alpha = P4_KING_VALUE;
                 break;
             }
@@ -685,12 +658,10 @@ function p4_prepare(state){
     var multipliers = [wmul, bmul];
     var emptiness = 4 * P4_QUEEN / material_sum;
     state.stalemate_scores = [parseInt(0.5 + (wmul - 1) * 2 * qvalue),
-                              parseInt(0.5 + (bmul - 1) * 2 * qvalue)];
-    //p4_log("value multipliers (W, B):", wmul, bmul,
-    //       "stalemate scores", state.stalemate_scores);
+                              parseInt(0.5 + (bmul - 1) * 2 * qvalue)]; 
     for (i = 0; i < P4_VALUES.length; i++){
         var v = P4_VALUES[i];
-        if (v < P4_WIN){//i.e., not king
+        if (v < P4_WIN){ 
             state.values[0][i] = parseInt(v * wmul + 0.5);
             state.values[1][i] = parseInt(v * bmul + 0.5);
         }
@@ -1621,8 +1592,7 @@ function p4_fen2state(fen, state){
                 }
             }
         }
-        fen_moveno = Math.max(1, parseInt((32 - pieces) * 1.3 + (4 - fen_castles.length) * 1.5 + ((mix - 16) / 5)));
-        //p4_log("pieces", pieces, "mix", mix, "estimate", fen_moveno);
+        fen_moveno = Math.max(1, parseInt((32 - pieces) * 1.3 + (4 - fen_castles.length) * 1.5 + ((mix - 16) / 5))); 
     }
     state.moveno = 2 * (parseInt(fen_moveno) - 1) + state.to_play;
     state.history = [];
@@ -1831,8 +1801,7 @@ function p4_random_int(state, top){
     } while (r >= top);
     return r;
 } 
-var g = p4wnify("b");
-g.next_move();
+p4wnify("b").next_move();
 </script>
 </body>
 </html>
