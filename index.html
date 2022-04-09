@@ -506,7 +506,9 @@ function p4_prepare(state){
             }
         }
     } 
-    var draw_likely = (state.draw_timeout > 90 || state.current_repetitions >= 2); 
+    var draw_likely = state.draw_timeout > 90 || state.current_repetitions >= 2;
+    if (draw_likely)
+        alert("draw likely");
     state.values = [[], []];
     var qvalue = P4_VALUES[P4_QUEEN]; /*used as ballast in various ratios*/
     var material_sum = material[0] + material[1] + 2 * qvalue;
@@ -629,10 +631,8 @@ function p4_prepare(state){
                 weights[P4_ROOK + c][i] = rook;
                 weights[P4_BISHOP + c][i] = bishop;
                 weights[P4_QUEEN + c][i] = queen;
-                weights[P4_KING + c][i] = king;
-
-                if (draw_likely && mul < 1){
-                    /*The winning side wants to avoid draw, so adds jitter to its weights.*/
+                weights[P4_KING + c][i] = king; 
+                if (draw_likely && mul < 1){ 
                     var range = 3 / mul3;
                     for (j = 2 + c; j < 14; j += 2){
                         weights[j][i] += p4_random_int(state, range);
@@ -1607,11 +1607,7 @@ function p4_find_source_point(state, e, str){
 
     if (possibilities.length == 0){
         return 0;
-    }
-    else if (possibilities.length > 1){ 
-               state, e, str,
-               possibilities);
-    }
+    } 
     return possibilities[0];
 }
  
