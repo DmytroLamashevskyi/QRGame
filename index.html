@@ -36,7 +36,7 @@ var P4WN_IMAGE_BASE64 = [
     'R0lGODlhHgAeAKEBAAAAAP///////////yH5BAEAAAIALAAAAAAeAB4AAAJ0lI+pywzQYnuynhcCtRFryElbKILcg6bqul5elqHwB8wx9drxXOuw7Pv1cj5icRcUJoVGXdPZW36kNyqN+uRBosnsz+CdLkdGFlCb8JjNt8VqrHKfrSkFcc392Jn4s8mlAhdnl0f3l5YiODLRV0eCRxK5UAAAOw==',
     'R0lGODlhHgAeAKEAAP///wAAAP///////yH5BAEAAAIALAAAAAAeAB4AAAJ6lI+pyxzRYnuyngcetFHnzXVgKJKaAGnep6IoZWBqkNWyrX4vO9MfwJuxgr1fT3hMApNHYpPpgSKlOSqN6lRaKVdpNhrraqG68NcLu4h9wHa7OlKzycs0AnMulu9Bt78f94J39naSgLeFGCiY2OLQaCiyRcLYQ3mZUAAAOw==',
     'R0lGODlhHgAeAKEAAP///wAAAP///////yH5BAEAAAIALAAAAAAeAB4AAAKalI+py+3PQoBNogDAPBZizWWb8I2VyEljuXSkepnqOrEGfOPvKs4hD7oFdzWZpth7DV85YC2Dsu1Sm5IEerTpSEeuCPuNYmTjaw9rznYvZ+gn3DYJ20d6Wq60w+94b28G+LbENgMGVti3Y7jo5qIgGFjo5lAmaKgymMAX+eb4mMUJmBmDyQiaOGe6iEpkeejzEBpJQTpLe+tQAAA7',
-    'R0lGODlhHgAeAKEAAP///wAAAP///////yH5BAEAAAIALAAAAAAeAB4AAAJ6lI+pyxzRYnuyngcetFHnzXVgKJKaAGnep6IoZWBqkNWyrX4vO9MfwJuxgr1fT3hMApNHYpPpgSKlOSqN6lRaKVdpNhrraqG68NcLu4h9wHa7OlKzycs0AnMulu9Bt78f94J39naSgLeFGCiY2OLQaCiyRcLYQ3mZUAAAOw=='
+    'R0lGODlhHgAeAKEAAP///wAAAP///////yH5BAEAAAIALAAAAAAeAB4AAAJ6lI+py+3PQoBNImlPfniarmEQ+InldnkCWaabxZqrTHe1Gr8iCtoTOzuFYLaZDpfxKU0y42+pdLqgVKCzClVgsdotdeEDiMdkX0QypqZRKYAXzZ4GyHS3NYEWq/UqsH1etzbX1yWotOYw+OaW+HYn9zYSSTEURXnpUAAAOw=='
 ];
 
 var P4WN_PROMOTION_STRINGS = ['queen', 'rook', 'knight', 'bishop'];
@@ -270,119 +270,7 @@ _p4d_proto.flip_player = function(i){
     this.refresh_buttons();
     this.maybe_rotate_board();
     this.next_move();
-}; 
-var P4WN_CONTROLS = [
-    {/*white player */
-        onclick_wrap: function(p4d){
-            return function(e){
-                p4d.flip_player(0);
-            };
-        },
-        refresh: function(el){
-            var s = this.players[0];
-            el.innerHTML = 'white <img src="' + P4WN_IMAGE_DIR + '/' + s + '.png" alt="' + s + '">';
-        }
-    },
-    {/*black player */
-        onclick_wrap: function(p4d){
-            return function(e){
-                p4d.flip_player(1);
-            };
-        },
-        refresh: function(el){
-            var s = this.players[1];
-            el.innerHTML = 'black <img src="' + P4WN_IMAGE_DIR + '/' + s + '.png" alt="' + s + '">';
-        }
-    },
-    { 
-        onclick_wrap: function(p4d){
-            return function(e){
-                var p = p4d.players;
-                var tmp = p[0];
-                p[0] = p[1];
-                p[1] = tmp;
-                if (p[0] != p[1] && P4WN_ROTATE_BOARD)
-                    p4d.orientation = 1 - p4d.orientation;
-
-                p4d.refresh_buttons();
-                p4d.maybe_rotate_board();
-                p4d.next_move();
-            };
-        },
-        refresh: function(el){
-            if (this.players[0] != this.players[1])
-                el.innerHTML = '<b>swap</b>';
-            else
-                el.innerHTML = 'swap';
-        }
-    },
-    {/* undo*/
-        onclick_wrap: function(p4d){
-            return function(e){
-                p4d.goto_move(-2);
-            };
-        },
-        label: "<b>undo</i>"
-    },
-    {/* pawn promotion*/
-        onclick_wrap: function(p4d){
-            return function(e){
-                var x = (p4d.pawn_becomes + 1) % P4WN_PROMOTION_STRINGS.length;
-                p4d.pawn_becomes = x;
-                _event_target(e).innerHTML = 'pawn becomes <b>' + P4WN_PROMOTION_STRINGS[x] + '</b>';
-            };
-        },
-        refresh: function(el){
-            el.innerHTML = 'pawn becomes <b>' + P4WN_PROMOTION_STRINGS[this.pawn_becomes] + '</b>';
-        }
-    },
-    {/*computer level*/
-        onclick_wrap: function(p4d){
-            return function(e){
-                var x = (p4d.computer_level + 1) % P4WN_LEVELS.length;
-                p4d.computer_level = x;
-                _event_target(e).innerHTML = 'computer level: <b>' + P4WN_LEVELS[x] + '</b>';
-            };
-        },
-        refresh: function(el){
-            el.innerHTML = 'computer level: <b>' + P4WN_LEVELS[this.computer_level] + '</b>';
-        }
-    },
-    {/*draw button -- hidden unless a draw is offered */
-        id: 'draw_button',
-        label: '<b>Draw?</b>',
-        onclick_wrap: function(p4d){
-            return function(e){
-                window.clearTimeout(p4d.next_move_timeout);
-                window.clearTimeout(p4d.auto_play_timeout);
-                p4d.refresh_buttons();
-                p4d.log('DRAW');
-                p4_log(p4_state2fen(p4d.board_state));
-                p4d.auto_play_timeout = undefined;
-                p4d.next_move_timeout = undefined;
-            };
-        },
-        move_listener_wrap: function(p4d){
-            return function(move_result){
-                var draw_button = p4d.elements.draw_button;
-                if (move_result.flags & P4_MOVE_FLAG_DRAW){
-                    draw_button.style.display = 'inline-block';
-                    if (p4d.draw_offered || p4d.draw_offers > 5){
-                        draw_button.style.color = '#c00';
-                    }
-                    p4d.draw_offered = true;
-                    p4d.draw_offers ++;
-                }
-                else {
-                    p4d.draw_offered = false;
-                    draw_button.style.color = '#000';
-                    draw_button.style.display = 'none';
-                }
-            };
-        },
-        hidden: true
-    }
-];
+};  
 
 _p4d_proto.write_controls_html = function(lut){
     var div = this.elements.controls;
@@ -497,8 +385,7 @@ function p4wnify(id){
     e.log.style.height = board_height;
     e.board.style.height = board_height;
     e.controls.style.width = (15 * 30) + 'px';
-    p4d.write_board_html();
-    p4d.write_controls_html(P4WN_CONTROLS);
+    p4d.write_board_html(); 
     p4d.interpret_query_string();
     p4d.refresh();
     return p4d;
