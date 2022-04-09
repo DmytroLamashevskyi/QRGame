@@ -178,7 +178,7 @@ _p4d_proto.start_moving_piece = function(position){
     var img = this.elements.pieces[this.orientation ? 119 - position : position];
     this.elements.moving_img = img;
     img.style.position = 'fixed';
-    var yoffset = parseInt(30 / 2);
+    var yoffset = parseInt(15);
     if (window.event){
         img.style.left = (window.event.clientX + 1) + "px";
         img.style.top = (window.event.clientY - yoffset) + "px";
@@ -230,8 +230,7 @@ _p4d_proto.write_board_html = function(){
             var img = p4d_new_child(td, "img");
             pieces[i] = img;
             img.src = 'data:image/png;base64,' + P4WN_IMAGE_BASE64[0];
-            img.width= 30;
-            img.height= 30;
+            img.height = img.width= 30; 
         }
     }
 };
@@ -259,31 +258,6 @@ _p4d_proto.flip_player = function(i){
     this.next_move();
 };  
 
-_p4d_proto.write_controls_html = function(lut){
-    var div = this.elements.controls;
-    var buttons = this.buttons;
-    for (var i = 0; i < lut.length; i++){
-        var o = lut[i];
-        if (o.debug && ! P4_DEBUG)
-            continue;
-        var span = p4d_new_child(div, "span");
-        span.className = 'p4wn-control-button';
-        buttons.elements.push(span);
-        _add_event_listener(span, "click",
-                            o.onclick_wrap(this));
-        if (o.label)
-            span.innerHTML = o.label;
-        if (o.move_listener_wrap)
-            this.move_listeners.push(o.move_listener_wrap(this));
-        if (o.hidden)
-            span.style.display = 'none';
-        if (o.refresh)
-            buttons.refreshers.push([o.refresh, span]);
-        if (o.id)
-            this.elements[o.id] = span;
-    }
-    this.refresh_buttons();
-};
 
 function parse_query(query){
     if (query === undefined)
@@ -737,11 +711,7 @@ function p4_parse(state, colour, ep, score) {
     }
     if(ep){
         var pawn = P4_PAWN | colour;
-        var taken;
-        /* Some repetitive calculation here could be hoisted out, but that would
-            probably slow things: the common case is no pawns waiting to capture
-            enpassant, not 2.
-         */
+        var taken; 
         s = ep - dir - 1;
         if (board[s] == pawn){
             taken = values[P4_PAWN] + all_weights[P4_PAWN | other_colour][ep - dir];
@@ -797,18 +767,13 @@ function p4_check_castling(board, s, colour, dir, side){
         if (board[p + dir - 2] == knight ||
             board[p + dir + 2] == knight)
             return 0;
-    }
-
-    /* a pawn or king in any of 5 positions on row 7.
-     * or a knight on row 6. */
+    } 
     for(p = s + dir - 1; p < s + dir + 4; p++){
         E = board[p] & grid_mask;
         if(E == king_pawn || board[p + dir] == knight)
             return 0;
     }
-    /* scan back row for rooks, queens on the other side.
-     * Same side check is impossible, because the castling rook is there
-     */
+
     e = (side < 0) ? s + 2 : s;
     do {
         e -= side;
@@ -821,9 +786,7 @@ function p4_check_castling(board, s, colour, dir, side){
 }
 
 function p4_check_check(state, colour){
-    var board = state.board;
-    /*find the king.  The pieces list updates from the end,
-     * so the last-most king is correctly placed.*/
+    var board = state.board; 
     var pieces = state.pieces[colour];
     var p;
     var i = pieces.length;
@@ -846,10 +809,7 @@ function p4_check_check(state, colour){
             return true;
     }
     var diagonal_moves = P4_MOVES[P4_BISHOP];
-    var grid_moves = P4_MOVES[P4_ROOK];
-
-    /* diag_mask ignores rook moves of queens,
-     * grid_mask ignores the bishop moves*/
+    var grid_moves = P4_MOVES[P4_ROOK]; 
     var diag_slider = P4_BISHOP | other_colour;
     var diag_mask = 27;
     var grid_slider = P4_ROOK | other_colour;
@@ -900,9 +860,7 @@ function p4_optimise_piece_list(state){
                 pos: p[1],
                 threatened: 0
             };
-        }
-        /* Find the best score for each piece by pure static weights,
-         * ignoring captures, which have their own path to the top. */
+        } 
         for(i = movelist.length - 1; i >= 0; i--){
             var mv = movelist[i];
             var score = mv[0];
@@ -912,9 +870,7 @@ function p4_optimise_piece_list(state){
                 var x = scores[s];
                 x.score = Math.max(x.score, score);
             }
-        }
-        /* moving out of a threat is worth considering, especially
-         * if it is a pawn and you are not.*/
+        } 
         for(i = threats.length - 1; i >= 0; i--){
             var mv = threats[i];
             var x = scores[mv[2]];
@@ -1000,8 +956,7 @@ function p4_make_move(state, s, e, promotion){
     board[s] = 0;
     var piece = S & 14;
     var moved_colour = S & 1;
-    var end_piece = S; /* can differ from S in queening*/
-    //now some stuff to handle queening, castling
+    var end_piece = S; 
     var rs = 0, re, rook;
     var ep_taken = 0, ep_position;
     var ep = 0;
@@ -1185,8 +1140,7 @@ function p4_move(state, s, e, promotion){
     var repetitions = (state.position_counts[shortfen] || 0) + 1;
     state.position_counts[shortfen] = repetitions;
     state.current_repetitions = repetitions;
-    if (state.draw_timeout > 100 || repetitions >= 3){
-        //XXX also if material drops too low?
+    if (state.draw_timeout > 100 || repetitions >= 3){ 
         flags |= P4_MOVE_FLAG_DRAW;
     }
     state.moveno++;
@@ -1234,7 +1188,7 @@ function p4_move2string(state, s, e, S, promotion, flags, moves){
         }
         else
             mv = dest;
-        if (e > 90 || e < 30){  //end row, queening
+        if (e > 90 || e < 30){   
             if (promotion === undefined)
                 promotion = P4_QUEEN;
             mv += '=' + P4_ENCODE_LUT.charAt(promotion);
@@ -1392,8 +1346,7 @@ function p4_fen2state(fen, state){
     var fen_timeout = fenbits[4];
     var fen_moveno = fenbits[5];
     if (fen_timeout === undefined)
-        fen_timeout = 0;
-    //fen does Y axis backwards, X axis forwards */
+        fen_timeout = 0; 
     var y = 90;
     var x = 1;
     var i;
@@ -1426,8 +1379,7 @@ function p4_fen2state(fen, state){
     }
     state.enpassant = (fen_enpassant != '-') ? p4_destringify_point(fen_enpassant) : 0;
     state.draw_timeout = parseInt(fen_timeout);
-    if (fen_moveno === undefined){
-        /*have a guess based on entropy and pieces remaining*/
+    if (fen_moveno === undefined){ 
         var pieces = 0;
         var mix = 0;
         var p, q, r;
@@ -1451,8 +1403,7 @@ function p4_fen2state(fen, state){
     state.history = [];
     state.beginning = fen;
     state.prepared = false;
-    state.position_counts = {};
-    /* Wrap external functions as methods. */
+    state.position_counts = {}; 
     state.move = function(s, e, promotion){
         return p4_move(this, s, e, promotion);
     };
@@ -1510,18 +1461,14 @@ function p4_initialise_state(){
 function p4_new_game(){
     return p4_fen2state(P4_INITIAL_BOARD);
 } 
-function p4_interpret_movestring(state, str){
-    /* Ignore any irrelevant characters, then tokenise.
-     *
-     */
+function p4_interpret_movestring(state, str){ 
     var FAIL = [0, 0];
     var algebraic_re = /^\s*([RNBQK]?[a-h]?[1-8]?)[ :x-]*([a-h][1-8]?)(=[RNBQ])?[!?+#e.p]*\s*$/;
     var castle_re = /^\s*([O0o]-[O0o](-[O0o])?)\s*$/;
     var position_re = /^[a-h][1-8]$/;
 
     var m = algebraic_re.exec(str);
-    if (m == null){
-        /*check for castling notation (O-O, O-O-O) */
+    if (m == null){ 
         m = castle_re.exec(str);
         if (m){
             s = 25 + state.to_play * 70;
@@ -1538,13 +1485,11 @@ function p4_interpret_movestring(state, str){
     var queen = m[3];
     var s, e, q;
     var moves, i;
-    if (src == '' || src == undefined){
-        /* a single coordinate pawn move */
+    if (src == '' || src == undefined){ 
         e = p4_destringify_point(dest);
         s = p4_find_source_point(state, e, 'P' + dest.charAt(0));
     }
-    else if (/^[RNBQK]/.test(src)){
-        /*pgn format*/
+    else if (/^[RNBQK]/.test(src)){ 
         e = p4_destringify_point(dest);
         s = p4_find_source_point(state, e, src);
     }
@@ -1559,8 +1504,7 @@ function p4_interpret_movestring(state, str){
     if (s == 0)
         return FAIL;
 
-    if (queen){
-        /* the chosen queen piece */
+    if (queen){ 
         q = P4_PIECE_LUT[queen.charAt(1)];
     }
     return [s, e, q];
@@ -1571,17 +1515,14 @@ function p4_find_source_point(state, e, str){
     var colour = state.to_play;
     var piece = P4_PIECE_LUT[str.charAt(0)];
     piece |= colour;
-    var s, i;
-
-    var row, column;
-    /* can be specified as Na, Na3, N3, and who knows, N3a? */
+    var s, i; 
+    var row, column; 
     for (i = 1; i < str.length; i++){
         var c = str.charAt(i);
         if (/[a-h]/.test(c)){
             column = str.charCodeAt(i) - 96;
         }
-        else if (/[1-8]/.test(c)){
-            /*row goes 2 - 9 */
+        else if (/[1-8]/.test(c)){ 
             row = 1 + parseInt(c);
         }
     }
