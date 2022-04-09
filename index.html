@@ -17,10 +17,7 @@
 <body id="b"> 
 <script> 
 
-var P4WN_ROTATE_BOARD = true;
-var P4WN_LEVELS = ['stupid', 'middling', 'default', 'slow', 'slowest']; 
-
-var P4WN_IMAGE_DIR = 'images'; 
+var P4WN_ROTATE_BOARD = true;  
 
 var P4WN_IMAGE_BASE64 = [
     'R0lGODlhAQABAIAAAMDAwAAAACH5BAEAAAAALAAAAAABAAEAAAICRAEAOw==',
@@ -38,14 +35,11 @@ var P4WN_IMAGE_BASE64 = [
     'R0lGODlhHgAeAKEAAP///wAAAP///////yH5BAEAAAIALAAAAAAeAB4AAAKalI+py+3PQoBNogDAPBZizWWb8I2VyEljuXSkepnqOrEGfOPvKs4hD7oFdzWZpth7DV85YC2Dsu1Sm5IEerTpSEeuCPuNYmTjaw9rznYvZ+gn3DYJ20d6Wq60w+94b28G+LbENgMGVti3Y7jo5qIgGFjo5lAmaKgymMAX+eb4mMUJmBmDyQiaOGe6iEpkeejzEBpJQTpLe+tQAAA7',
     'R0lGODlhHgAeAKEAAP///wAAAP///////yH5BAEAAAIALAAAAAAeAB4AAAJ6lI+py+3PQoBNImlPfniarmEQ+InldnkCWaabxZqrTHe1Gr8iCtoTOzuFYLaZDpfxKU0y42+pdLqgVKCzClVgsdotdeEDiMdkX0QypqZRKYAXzZ4GyHS3NYEWq/UqsH1etzbX1yWotOYw+OaW+HYn9zYSSTEURXnpUAAAOw=='
 ];
-
-var P4WN_PROMOTION_STRINGS = ['queen', 'rook', 'knight', 'bishop'];
+ 
 var P4WN_PROMOTION_INTS = [P4_QUEEN, P4_ROOK, P4_KNIGHT, P4_BISHOP];
 
 var _p4d_proto = {};
-
-
-/* MSIE 6 compatibility functions */
+ 
 function _add_event_listener(el, eventname, fn){
     if (el.addEventListener === undefined){
         el.attachEvent('on' + eventname, fn);
@@ -55,16 +49,14 @@ function _add_event_listener(el, eventname, fn){
     }
 }
 
-function _event_target(e){
-    /*e.srcElement is not quite equivalent, but nothing is closer */
+function _event_target(e){ 
     return (e.currentTarget) ? e.currentTarget : e.srcElement;
 }
 
 _p4d_proto.square_clicked = function(square){
     var board = this.board_state.board;
     var mover = this.board_state.to_play;
-    if (this.players[mover] == 'computer'){
-        p4_log("not your turn!");
+    if (this.players[mover] == 'computer'){ 
         return;
     }
     var piece = board[square];
@@ -93,10 +85,7 @@ _p4d_proto.move = function(start, end, promotion){
                     };
                 }(this), 1);
         }
-    }
-    else {
-        p4_log("bad move!", start, end);
-    }
+    } 
     for (var i = 0; i < this.move_listeners.length; i++){
         this.move_listeners[i](move_result);
     }
@@ -121,15 +110,13 @@ _p4d_proto.computer_move = function(){
     var depth = this.computer_level + 1;
     var start_time = Date.now();
     mv = state.findmove(depth);
-    var delta = Date.now() - start_time;
-    p4_log("findmove took", delta);
+    var delta = Date.now() - start_time; 
     if (false && depth > 2){
         var min_time = 25 * depth;
         while (delta < min_time){
             depth++;
             mv = state.findmove(depth);
-            delta = Date.now() - start_time;
-            p4_log("retry at depth", depth, " total time:", delta);
+            delta = Date.now() - start_time; 
         }
     }
     this.move(mv[0], mv[1]);
@@ -392,22 +379,7 @@ function p4wnify(id){
 }
 
 P4wn_display.prototype = _p4d_proto;
-
-
-var p4_log;
-if (this.imports !== undefined &&
-    this.printerr !== undefined){//seed or gjs
-    p4_log = function(){
-        var args = Array.prototype.slice.call(arguments);
-        printerr(args.join(', '));
-    };
-}
-else if (this.console === undefined){//MSIE
-    p4_log = function(){};
-}
-else {
-    p4_log = function(){console.log.apply(console, arguments);};
-} 
+ 
 if (Date.now === undefined)
     Date.now = function(){return (new Date).getTime();}; 
 var P4_PAWN = 2, P4_ROOK = 4, P4_KNIGHT = 6, P4_BISHOP = 8, P4_QUEEN = 12, P4_KING = 10;
@@ -534,9 +506,7 @@ function p4_prepare(state){
             }
         }
     } 
-    var draw_likely = (state.draw_timeout > 90 || state.current_repetitions >= 2);
-    if (draw_likely)
-        p4_log("draw likely", state.current_repetitions, state.draw_timeout);
+    var draw_likely = (state.draw_timeout > 90 || state.current_repetitions >= 2); 
     state.values = [[], []];
     var qvalue = P4_VALUES[P4_QUEEN]; /*used as ballast in various ratios*/
     var material_sum = material[0] + material[1] + 2 * qvalue;
@@ -1002,8 +972,7 @@ function p4_findmove(state, level, colour, ep){
         var mscore = mv[0];
         var ms = mv[1];
         var me = mv[2];
-        if (mscore > P4_WIN){
-            p4_log("XXX taking king! it should never come to this");
+        if (mscore > P4_WIN){ 
             alpha = P4_KING_VALUE;
             bs = ms;
             be = me;
@@ -1190,8 +1159,7 @@ function p4_move(state, s, e, promotion){
 
     /*is it check? */
     if (p4_check_check(state, colour)){
-        p4_unmake_move(state, changes);
-        p4_log('in check', changes);
+        p4_unmake_move(state, changes); 
         return {flags: P4_MOVE_ILLEGAL, ok: false, string: "in check!"};
     } 
 
@@ -1242,8 +1210,7 @@ function p4_move(state, s, e, promotion){
     if (is_mate)
         flags |= P4_MOVE_FLAG_MATE;
 
-    var movestring = p4_move2string(state, s, e, S, promotion, flags, moves);
-    p4_log("successful move", s, e, movestring, flags);
+    var movestring = p4_move2string(state, s, e, S, promotion, flags, moves); 
     state.prepared = false;
     return {
         flags: flags,
@@ -1320,8 +1287,7 @@ function p4_move2string(state, s, e, S, promotion, flags, moves){
 }
 
 
-function p4_jump_to_moveno(state, moveno){
-    p4_log('jumping to move', moveno);
+function p4_jump_to_moveno(state, moveno){ 
     if (moveno === undefined || moveno > state.moveno)
         moveno = state.moveno;
     else if (moveno < 0){
@@ -1637,14 +1603,12 @@ function p4_find_source_point(state, e, str){
                    p4_unmake_move(state, change);
             }
         }
-    }
-    p4_log("finding", str, "that goes to", e, "got", possibilities);
+    } 
 
     if (possibilities.length == 0){
         return 0;
     }
-    else if (possibilities.length > 1){
-        p4_log("p4_find_source_point seems to have failed",
+    else if (possibilities.length > 1){ 
                state, e, str,
                possibilities);
     }
