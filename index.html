@@ -36,7 +36,7 @@ var P4WN_IMAGE_BASE64 = [
     'R0lGODlhHgAeAKEAAP///wAAAP///////yH5BAEAAAIALAAAAAAeAB4AAAJ6lI+py+3PQoBNImlPfniarmEQ+InldnkCWaabxZqrTHe1Gr8iCtoTOzuFYLaZDpfxKU0y42+pdLqgVKCzClVgsdotdeEDiMdkX0QypqZRKYAXzZ4GyHS3NYEWq/UqsH1etzbX1yWotOYw+OaW+HYn9zYSSTEURXnpUAAAOw=='
 ];
  
-var P4WN_PROMOTION_INTS = [P4_QUEEN, P4_ROOK, P4_KNIGHT, P4_BISHOP];
+var P4WN_PROMOTION_INTS = [12, 4, 6, 8];
 
 var _p4d_proto = {};
  
@@ -77,7 +77,7 @@ _p4d_proto.move = function(start, end, promotion){
     if(move_result.ok){
         this.display_move_text(state.moveno, move_result.string);
         this.refresh();
-        if (! (move_result.flags & P4_MOVE_FLAG_MATE)){
+        if (! (move_result.flags & 4)){
             this.next_move_timeout = window.setTimeout(
                 function(p4d){
                     return function(){
@@ -132,40 +132,14 @@ _p4d_proto.display_move_text = function(moveno, string){
         while(mn.length < 4)
             mn = ' ' + mn;
     } 
-};
-
-_p4d_proto.log = function(msg, klass, onclick){
-    var div = this.elements.log;
-    var item = p4d_new_child(div, "div");
-    item.className = klass;
-    if (onclick !== undefined)
-        _add_event_listener(item, "click", onclick);
-    item.innerHTML = msg;
-    div.scrollTop = 999999;
-}
-
-_p4d_proto.goto_move = function(n){
-    var delta;
-    if (n < 0)
-        delta = -n;
-    else
-        delta = this.board_state.moveno - n;
-    if (delta > this.board_state.moveno)
-        delta = this.board_state.moveno;
-    var div = this.elements.log;
-    for (var i = 0; i < delta; i++){
-        div.removeChild(div.lastChild);
-    }
-    this.board_state.jump_to_moveno(n);
-    this.refresh();
-    this.next_move();
 }; 
+ 
 
 _p4d_proto.refresh = function(){
     var pieces = this.elements.pieces;
     var board = this.board_state.board;
     for (var i = 20; i < 100; i++){
-        if(board[i] != P4_EDGE){
+        if(board[i] != 16){
             var j = this.orientation ? 119 - i : i;
             pieces[j].src = 'data:image/png;base64,' + P4WN_IMAGE_BASE64[board[i]];
         }
@@ -202,7 +176,7 @@ _p4d_proto.stop_moving_piece = function(){
     document.onmousemove = null;
 };
 
-function p4d_new_child(element, childtag, className){
+function nc(element, childtag, className){
     var child = document.createElement(childtag);
     element.appendChild(child);
     if (className !== undefined)
@@ -213,13 +187,13 @@ function p4d_new_child(element, childtag, className){
 _p4d_proto.write_board_html = function(){
     var div = this.elements.board;
     var pieces = this.elements.pieces = [];
-    var table = p4d_new_child(div, "table");
-    var tbody = p4d_new_child(table, "tbody");
+    var table = nc(div, "table");
+    var tbody = nc(table, "tbody");
     for (var y = 9; y > 1; y--){
-        var tr = p4d_new_child(tbody, "tr");
+        var tr = nc(tbody, "tr");
         for(var x = 1;  x < 9; x++){
             var i = y * 10 + x;
-            var td = p4d_new_child(tr, "td");
+            var td = nc(tr, "td");
             td.className = (x + y) & 1 ? 'p4wn-black-square' : 'p4wn-white-square';
             _add_event_listener(td, 'click',
                                 function(p4d, n){
@@ -227,7 +201,7 @@ _p4d_proto.write_board_html = function(){
                                         p4d.square_clicked(p4d.orientation ? 119 - n : n);
                                     };
                                 }(this, i));
-            var img = p4d_new_child(td, "img");
+            var img = nc(td, "img");
             pieces[i] = img;
             img.src = 'data:image/png;base64,' + P4WN_IMAGE_BASE64[0];
             img.height = img.width= 30; 
@@ -253,8 +227,7 @@ _p4d_proto.maybe_rotate_board = function(){
 
 _p4d_proto.flip_player = function(i){
     this.players[i] = (this.players[i] == 'human') ? 'computer' : 'human';
-    this.refresh_buttons();
-    this.maybe_rotate_board();
+    this.refresh_buttons(); 
     this.next_move();
 };  
 
@@ -287,11 +260,9 @@ _p4d_proto.interpret_query_string = function(){
                 neither: ['computer', 'computer']
             }[s.toLowerCase()];
             if (players !== undefined){
-                this.players = players;
-                this.maybe_rotate_board();
+                this.players = players; 
             }
-        },
-        debug: function(s){P4_DEBUG = parseInt(s)}
+        }, 
     };
     var i;
     var query = parse_query();
@@ -316,14 +287,11 @@ function P4wn_display(target){
         container = target.get(0);
     else
         container = target;
-    var inner = p4d_new_child(container, "div", 'p4wn-wrapper');
+    var inner = nc(container, "div", 'p4wn-wrapper');
     this.elements = {};
     this.elements.inner = inner;
     this.elements.container = container;
-    var board = this.elements.board = p4d_new_child(inner, "div", 'p4wn-board');
-    var log = this.elements.log = p4d_new_child(inner, "div", 'p4wn-log');
-    this.elements.messages = p4d_new_child(inner, "div", 'p4wn-messages');
-    this.elements.controls = p4d_new_child(container, "div", 'p4wn-controls');
+    var board = this.elements.board = nc(inner, "div", 'p4wn-board');  
     this.start = 0;
     this.draw_offers = 0;
     this.board_state = p4_new_game();
@@ -340,12 +308,8 @@ function P4wn_display(target){
 
 function p4wnify(id){
     var p4d = new P4wn_display(id);
-    var e = p4d.elements;
-    var board_height = (8 * (30 + 3)) + 'px';
-    e.inner.style.height = board_height;
-    e.log.style.height = board_height;
-    e.board.style.height = board_height;
-    e.controls.style.width = (15 * 30) + 'px';
+    var e = p4d.elements; 
+    e.board.style.height = e.inner.style.height = '264px';  
     p4d.write_board_html(); 
     p4d.interpret_query_string();
     p4d.refresh();
@@ -353,11 +317,7 @@ function p4wnify(id){
 }
 
 P4wn_display.prototype = _p4d_proto;
- 
-if (Date.now === undefined)
-    Date.now = function(){return (new Date).getTime();}; 
-var P4_PAWN = 2, P4_ROOK = 4, P4_KNIGHT = 6, P4_BISHOP = 8, P4_QUEEN = 12, P4_KING = 10;
-var P4_EDGE = 16; 
+   
 var P4_MOVES = [[], [],
                 [], [],
                 [1,10,-1,-10], [],
@@ -373,20 +333,17 @@ var P4_VALUES=[0, 0,      //Piece values
                61, 61,    //bishops
                8000, 8000,//kings
                180, 180,  //queens
-               0]; 
-var P4_KING_VALUE = P4_VALUES[10];
-var P4_WIN = P4_KING_VALUE >> 1;
+               0];  
+var P4_WIN = 8000 >> 1;
  
 var P4_WIN_DECAY = 300;
-var P4_WIN_NOW = P4_KING_VALUE - 250;  
+var P4_WIN_NOW = 8000 - 250;  
 var P4_MAX_SCORE = 9999;    
 var P4_MIN_SCORE = -9999; 
 var P4_CENTRALISING_WEIGHTS;
 var P4_BASE_PAWN_WEIGHTS;
 var P4_KNIGHT_WEIGHTS;
-
-/*P4_DEBUG turns on debugging features */
-var P4_DEBUG = 0;
+  
 var P4_INITIAL_BOARD = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 1 1"; 
 var P4_USE_TYPED_ARRAYS = this.Int32Array !== undefined;
 
@@ -409,7 +366,7 @@ var P4_ENCODE_LUT = '  PPRRNNBBKKQQ';
 
 
 function p4_alphabeta_treeclimber(state, count, colour, score, s, e, alpha, beta){
-    var move = p4_make_move(state, s, e, P4_QUEEN);
+    var move = p4_make_move(state, s, e, 12);
     var i;
     var ncolour = 1 - colour;
     var movelist = p4_parse(state, colour, move.ep, -score);
@@ -423,7 +380,7 @@ function p4_alphabeta_treeclimber(state, count, colour, score, s, e, alpha, beta
             var ms = mv[1];
             var me = mv[2];
             if (mscore > P4_WIN){ 
-                alpha = P4_KING_VALUE;
+                alpha = 8000;
                 break;
             }
             t = -p4_alphabeta_treeclimber(state, count - 1, ncolour, mscore, ms, me,
@@ -471,7 +428,7 @@ function p4_prepare(state){
         var colour = a & 1;
         if(piece){
             pieces[colour].push([a, i]);
-            if (piece == P4_KING){
+            if (piece == 10){
                 kings[colour] = i;
             }
             else{
@@ -484,12 +441,12 @@ function p4_prepare(state){
     if (draw_likely)
         alert("draw likely");
     state.values = [[], []];
-    var qvalue = P4_VALUES[P4_QUEEN]; /*used as ballast in various ratios*/
+    var qvalue = P4_VALUES[12]; 
     var material_sum = material[0] + material[1] + 2 * qvalue;
     var wmul = 2 * (material[1] + qvalue) / material_sum;
     var bmul = 2 * (material[0] + qvalue) / material_sum;
     var multipliers = [wmul, bmul];
-    var emptiness = 4 * P4_QUEEN / material_sum;
+    var emptiness = 4 * 12 / material_sum;
     state.stalemate_scores = [parseInt(0.5 + (wmul - 1) * 2 * qvalue),
                               parseInt(0.5 + (bmul - 1) * 2 * qvalue)]; 
     for (i = 0; i < P4_VALUES.length; i++){
@@ -513,7 +470,7 @@ function p4_prepare(state){
         for (x = 1; x < 9; x++){
             i = y * 10 + x;
             a = board[i];
-            if ((a & 14) != P4_PAWN)
+            if ((a & 14) != 2)
                 continue;
             if ((a & 1) == 0){
                 pawn_cols[0][x] = y;
@@ -568,7 +525,7 @@ function p4_prepare(state){
                      */
                     if (y >= 4 && y <= 7){
                         var boost = 1 + 3 * (y == 5 || y == 6);
-                        pawn += parseInt((boost + p4_random_int(state, 4)) * 0.1 *
+                        pawn += parseInt((boost + rdi(state, 4)) * 0.1 *
                                          early_centre);
                     }
                     if (x == 4 || x == 5){
@@ -576,10 +533,9 @@ function p4_prepare(state){
                         pawn -= 3 * pawn_home;
                         pawn += 3 * row4;
                     }
-                }
-                /*pawn promotion row is weighted as a queen minus a pawn.*/
+                } 
                 if (promotion_row)
-                    pawn += state.values[c][P4_QUEEN] - state.values[c][P4_PAWN];
+                    pawn += state.values[c][12] - state.values[c][2];
 
                 /*pawns in front of a castled king should stay there*/
                 pawn += 4 * (y == 3 && ky[c] == 2 && Math.abs(our_dx) < 2 &&
@@ -594,22 +550,20 @@ function p4_prepare(state){
                     knight += 2 * parseInt(8 * mul / d);
                     rook += 2 * ((dx < 2) + (dy < 2));
                     bishop += 3 * (Math.abs((dx - dy))  < 2);
-                    queen += 2 * parseInt(8 / d) + (dx * dy == 0) + (dx - dy == 0);
-                    /* The losing king wants to stay in the middle, while
-                     the winning king goes in for the kill.*/
+                    queen += 2 * parseInt(8 / d) + (dx * dy == 0) + (dx - dy == 0); 
                     var king_centre_wt = 8 * emptiness * P4_CENTRALISING_WEIGHTS[i];
                     king += parseInt(150 * emptiness / (mul3 * d) + king_centre_wt * mul3);
                 }
-                weights[P4_PAWN + c][i] = pawn;
-                weights[P4_KNIGHT + c][i] = knight;
-                weights[P4_ROOK + c][i] = rook;
-                weights[P4_BISHOP + c][i] = bishop;
-                weights[P4_QUEEN + c][i] = queen;
-                weights[P4_KING + c][i] = king; 
+                weights[2 + c][i] = pawn;
+                weights[6 + c][i] = knight;
+                weights[4 + c][i] = rook;
+                weights[8 + c][i] = bishop;
+                weights[12 + c][i] = queen;
+                weights[10 + c][i] = king; 
                 if (draw_likely && mul < 1){ 
                     var range = 3 / mul3;
                     for (j = 2 + c; j < 14; j += 2){
-                        weights[j][i] += p4_random_int(state, range);
+                        weights[j][i] += rdi(state, range);
                     }
                 }
             }
@@ -618,19 +572,19 @@ function p4_prepare(state){
     state.prepared = true;
 }
 
-function p4_maybe_prepare(state){
-    if (! state.prepared)
-        p4_prepare(state);
+function mp(s){
+    if (! s.prepared)
+        p4_prepare(s);
 }
 
 
 function p4_parse(state, colour, ep, score) {
     var board = state.board;
-    var s, e;    //start and end position
-    var E, a;       //E=piece at end place, a= piece moving
+    var s, e; 
+    var E, a; 
     var i, j;
     var other_colour = 1 - colour;
-    var dir = (10 - 20 * colour); //dir= 10 for white, -10 for black
+    var dir = (10 - 20 * colour); 
     var movelist = [];
     var captures = [];
     var weight;
@@ -657,7 +611,7 @@ function p4_parse(state, colour, ep, score) {
                         captures.push([weight + values[E] + weight_lut[e] + all_weights[E][e], s, e]);
                     }
                 }
-                if(a == P4_KING && castle_flags){
+                if(a == 10 && castle_flags){
                     if((castle_flags & 1) &&
                         (board[s-1] + board[s-2] + board[s-3] == 0) &&
                         p4_check_castling(board, s - 2,other_colour,dir,-1)){//Q side
@@ -710,16 +664,16 @@ function p4_parse(state, colour, ep, score) {
         }
     }
     if(ep){
-        var pawn = P4_PAWN | colour;
+        var pawn = 2 | colour;
         var taken; 
         s = ep - dir - 1;
         if (board[s] == pawn){
-            taken = values[P4_PAWN] + all_weights[P4_PAWN | other_colour][ep - dir];
+            taken = values[2] + all_weights[2 | other_colour][ep - dir];
             captures.push([score - weight_lut[s] + weight_lut[ep] + taken, s, ep]);
         }
         s += 2;
         if (board[s] == pawn){
-            taken = values[P4_PAWN] + all_weights[P4_PAWN | other_colour][ep - dir];
+            taken = values[2] + all_weights[2 | other_colour][ep - dir];
             captures.push([score - weight_lut[s] + weight_lut[ep] + taken, s, ep]);
         }
     }
@@ -729,10 +683,10 @@ function p4_check_castling(board, s, colour, dir, side){
     var e;
     var E;
     var m, p;
-    var knight = colour + P4_KNIGHT;
-    var diag_slider = P4_BISHOP | colour;
+    var knight = colour + 6;
+    var diag_slider = 8 | colour;
     var diag_mask = 27;
-    var grid_slider = P4_ROOK | colour;
+    var grid_slider = 4 | colour;
     var king_pawn = 2 | colour;
     var grid_mask = 23;
 
@@ -792,27 +746,27 @@ function p4_check_check(state, colour){
     var i = pieces.length;
     do {
         p = pieces[--i];
-    } while (p[0] != (P4_KING | colour));
+    } while (p[0] != (10 | colour));
     var s = p[1];
     var other_colour = 1 - colour;
     var dir = 10 - 20 * colour;
-    if (board[s + dir - 1] == (P4_PAWN | other_colour) ||
-        board[s + dir + 1] == (P4_PAWN | other_colour))
+    if (board[s + dir - 1] == (2 | other_colour) ||
+        board[s + dir + 1] == (2 | other_colour))
         return true;
-    var knight_moves = P4_MOVES[P4_KNIGHT];
-    var king_moves = P4_MOVES[P4_KING];
-    var knight = P4_KNIGHT | other_colour;
-    var king = P4_KING | other_colour;
+    var knight_moves = P4_MOVES[6];
+    var king_moves = P4_MOVES[10];
+    var knight = 6 | other_colour;
+    var king = 10 | other_colour;
     for (i = 0; i < 8; i++){
         if (board[s + knight_moves[i]] == knight ||
             board[s + king_moves[i]] == king)
             return true;
     }
-    var diagonal_moves = P4_MOVES[P4_BISHOP];
-    var grid_moves = P4_MOVES[P4_ROOK]; 
-    var diag_slider = P4_BISHOP | other_colour;
+    var diagonal_moves = P4_MOVES[8];
+    var grid_moves = P4_MOVES[4]; 
+    var diag_slider = 8 | other_colour;
     var diag_mask = 27;
-    var grid_slider = P4_ROOK | other_colour;
+    var grid_slider = 4 | other_colour;
     var grid_mask = 23;
     for (i = 0; i < 4; i++){
         var m = diagonal_moves[i];
@@ -929,7 +883,7 @@ function p4_findmove(state, level, colour, ep){
         var ms = mv[1];
         var me = mv[2];
         if (mscore > P4_WIN){ 
-            alpha = P4_KING_VALUE;
+            alpha = 8000;
             bs = ms;
             be = me;
             break;
@@ -960,7 +914,7 @@ function p4_make_move(state, s, e, promotion){
     var rs = 0, re, rook;
     var ep_taken = 0, ep_position;
     var ep = 0;
-    if(piece == P4_PAWN){
+    if(piece == 2){
         if((60 - e) * (60 - e) > 900){ 
             promotion |= moved_colour;
             board[e] = promotion;
@@ -975,10 +929,10 @@ function p4_make_move(state, s, e, promotion){
             ep = (s + e) >> 1;
         }
     }
-    else if (piece == P4_KING && ((s - e) * (s - e) == 4)){  
+    else if (piece == 10 && ((s - e) * (s - e) == 4)){  
         rs = s - 4 + (s < e) * 7;
         re = (s + e) >> 1;  
-        rook = moved_colour + P4_ROOK;
+        rook = moved_colour + 4;
         board[rs] = 0;
         board[re] = rook; 
     }
@@ -1046,33 +1000,20 @@ function p4_make_move(state, s, e, promotion){
     };
 }
 
-function p4_unmake_move(state, move){
-    var board = state.board;
-    if (move.ep_position){
-        board[move.ep_position] = move.ep_taken;
+function p4_unmake_move(s, m){
+    var board = s.board;
+    if (m.ep_position){
+        board[m.ep_position] = m.ep_taken;
     }
-    board[move.s] = move.S;
-    board[move.e] = move.E; 
-    if(move.rs){
-        board[move.rs] = move.rook;
-        board[move.re] = 0; 
+    board[m.s] = m.S;
+    board[m.e] = m.E; 
+    if(m.rs){
+        board[m.rs] = m.rook;
+        board[m.re] = 0; 
     }
-    state.pieces = move.pieces;
-    state.castles = move.castles;
-} 
-
-var P4_MOVE_FLAG_OK = 1;
-var P4_MOVE_FLAG_CHECK = 2;
-var P4_MOVE_FLAG_MATE = 4;
-var P4_MOVE_FLAG_CAPTURE = 8;
-var P4_MOVE_FLAG_CASTLE_KING = 16;
-var P4_MOVE_FLAG_CASTLE_QUEEN = 32;
-var P4_MOVE_FLAG_DRAW = 64;
-
-var P4_MOVE_ILLEGAL = 0;
-var P4_MOVE_MISSED_MATE = P4_MOVE_FLAG_CHECK | P4_MOVE_FLAG_MATE;
-var P4_MOVE_CHECKMATE = P4_MOVE_FLAG_OK | P4_MOVE_FLAG_CHECK | P4_MOVE_FLAG_MATE;
-var P4_MOVE_STALEMATE = P4_MOVE_FLAG_OK | P4_MOVE_FLAG_MATE;
+    s.pieces = m.pieces;
+    s.castles = m.castles;
+}  
 
 function p4_move(state, s, e, promotion){
     var board = state.board;
@@ -1084,7 +1025,7 @@ function p4_move(state, s, e, promotion){
             s = mv[0];
             e = mv[1];
             if (s == 0)
-                return {flags: P4_MOVE_ILLEGAL, ok: false};
+                return {flags: 0, ok: false};
             promotion = mv[2];
         }
         else {/*assume two point strings: 'e2', 'e4'*/
@@ -1093,12 +1034,12 @@ function p4_move(state, s, e, promotion){
         }
     }
     if (promotion === undefined)
-        promotion = P4_QUEEN;
+        promotion = 12;
     var E=board[e];
     var S=board[s]; 
     var i;
     var legal = false;
-    p4_maybe_prepare(state);
+    mp(state);
     var moves = p4_parse(state, colour, state.enpassant, 0);
     for (i = 0; i < moves.length; i++){
         if (e == moves[i][2] && s == moves[i][1]){
@@ -1107,53 +1048,52 @@ function p4_move(state, s, e, promotion){
         }
     }
     if (! legal) {
-        return {flags: P4_MOVE_ILLEGAL, ok: false};
+        return {flags: 0, ok: false};
     }
  
     var changes = p4_make_move(state, s, e, promotion);
-
-    /*is it check? */
+ 
     if (p4_check_check(state, colour)){
         p4_unmake_move(state, changes); 
-        return {flags: P4_MOVE_ILLEGAL, ok: false, string: "in check!"};
+        return {flags: 0, ok: false, string: "in check!"};
     } 
 
-    var flags = P4_MOVE_FLAG_OK;
+    var flags = 1;
 
     state.enpassant = changes.ep;
     state.history.push([s, e, promotion]);
  
     if (changes.E || changes.ep_position){
         state.draw_timeout = 0;
-        flags |= P4_MOVE_FLAG_CAPTURE;
+        flags |= 8;
     }
-    else if (S & 14 == P4_PAWN){
+    else if (S & 14 == 2){
         state.draw_timeout = 0;
     }
     else{
         state.draw_timeout++;
     }
     if (changes.rs){
-        flags |= (s > e) ? P4_MOVE_FLAG_CASTLE_QUEEN : P4_MOVE_FLAG_CASTLE_KING;
+        flags |= (s > e) ? 32 : 16;
     }
     var shortfen = p4_state2fen(state, true);
     var repetitions = (state.position_counts[shortfen] || 0) + 1;
     state.position_counts[shortfen] = repetitions;
     state.current_repetitions = repetitions;
     if (state.draw_timeout > 100 || repetitions >= 3){ 
-        flags |= P4_MOVE_FLAG_DRAW;
+        flags |= 64;
     }
     state.moveno++;
     state.to_play = other_colour;
 
     if (p4_check_check(state, other_colour)){
-        flags |= P4_MOVE_FLAG_CHECK;
+        flags |= 2;
     } 
     var is_mate = true;
     var replies = p4_parse(state, other_colour, changes.ep, 0);
     for (i = 0; i < replies.length; i++){
         var m = replies[i];
-        var change2 = p4_make_move(state, m[1], m[2], P4_QUEEN);
+        var change2 = p4_make_move(state, m[1], m[2], 12);
         var check = p4_check_check(state, other_colour);
         p4_unmake_move(state, change2);
         if (!check){
@@ -1162,7 +1102,7 @@ function p4_move(state, s, e, promotion){
         }
     }
     if (is_mate)
-        flags |= P4_MOVE_FLAG_MATE;
+        flags |= 4;
 
     var movestring = p4_move2string(state, s, e, S, promotion, flags, moves); 
     state.prepared = false;
@@ -1178,11 +1118,11 @@ function p4_move2string(state, s, e, S, promotion, flags, moves){
     var piece = S & 14;
     var src, dest;
     var mv, i;
-    var capture = flags & P4_MOVE_FLAG_CAPTURE;
+    var capture = flags & 8;
 
     src = p4_stringify_point(s);
     dest = p4_stringify_point(e);
-    if (piece == P4_PAWN){
+    if (piece == 2){
         if (capture){
             mv = src.charAt(0) + 'x' + dest;
         }
@@ -1190,11 +1130,11 @@ function p4_move2string(state, s, e, S, promotion, flags, moves){
             mv = dest;
         if (e > 90 || e < 30){   
             if (promotion === undefined)
-                promotion = P4_QUEEN;
+                promotion = 12;
             mv += '=' + P4_ENCODE_LUT.charAt(promotion);
         }
     }
-    else if (piece == P4_KING && (s-e) * (s-e) == 4) {
+    else if (piece == 10 && (s-e) * (s-e) == 4) {
         if (e < s)
             mv = 'O-O-O';
         else
@@ -1229,13 +1169,13 @@ function p4_move2string(state, s, e, S, promotion, flags, moves){
         }
         mv = pstr + col_qualifier + row_qualifier + (capture ? 'x' : '') + dest;
     }
-    if (flags & P4_MOVE_FLAG_CHECK){
-        if (flags & P4_MOVE_FLAG_MATE)
+    if (flags & 2){
+        if (flags & 4)
             mv += '#';
         else
             mv += '+';
     }
-    else if (flags & P4_MOVE_FLAG_MATE)
+    else if (flags & 4)
         mv += ' stalemate';
     return mv;
 }
@@ -1271,8 +1211,7 @@ function p4_jump_to_moveno(state, moveno){
 }
 
  
-function p4_state2fen(state, reduced){
-    var piece_lut = '  PpRrNnBbKkQq';
+function p4_state2fen(state, reduced){ 
     var board = state.board;
     var fen = ''; 
     for (var y = 9; y > 1; y--){
@@ -1284,7 +1223,7 @@ function p4_state2fen(state, reduced){
             else{
                 if (count)
                     fen += count.toString();
-                fen += piece_lut.charAt(piece);
+                fen += '  PpRrNnBbKkQq'.charAt(piece);
                 count = 0;
             }
         }
@@ -1454,22 +1393,18 @@ function p4_initialise_state(){
         history: [],
         treeclimber: p4_alphabeta_treeclimber
     };
-    p4_random_seed(state, P4_DEBUG ? 1 : Date.now());
+    rs(state, Date.now());
     return state;
 }
 
 function p4_new_game(){
     return p4_fen2state(P4_INITIAL_BOARD);
 } 
-function p4_interpret_movestring(state, str){ 
-    var FAIL = [0, 0];
-    var algebraic_re = /^\s*([RNBQK]?[a-h]?[1-8]?)[ :x-]*([a-h][1-8]?)(=[RNBQ])?[!?+#e.p]*\s*$/;
-    var castle_re = /^\s*([O0o]-[O0o](-[O0o])?)\s*$/;
-    var position_re = /^[a-h][1-8]$/;
-
-    var m = algebraic_re.exec(str);
+function p4_interpret_movestring(state, str){  
+    var pre = /^[a-h][1-8]$/; 
+    var m = /^\s*([RNBQK]?[a-h]?[1-8]?)[ :x-]*([a-h][1-8]?)(=[RNBQ])?[!?+#e.p]*\s*$/.exec(str);
     if (m == null){ 
-        m = castle_re.exec(str);
+        m = /^\s*([O0o]-[O0o](-[O0o])?)\s*$/.exec(str);
         if (m){
             s = 25 + state.to_play * 70;
             if (m[2])/*queenside*/
@@ -1478,7 +1413,7 @@ function p4_interpret_movestring(state, str){
                 e = s + 2;
         }
         else
-            return FAIL;
+            return [0, 0];
     }
     var src = m[1];
     var dest = m[2];
@@ -1493,7 +1428,7 @@ function p4_interpret_movestring(state, str){
         e = p4_destringify_point(dest);
         s = p4_find_source_point(state, e, src);
     }
-    else if (position_re.test(src) && position_re.test(dest)){
+    else if (pre.test(src) && pre.test(dest)){
         s = p4_destringify_point(src);
         e = p4_destringify_point(dest);
     }
@@ -1538,7 +1473,7 @@ function p4_find_source_point(state, e, str){
                 (column === undefined || column == s % 10) &&
                 (row === undefined || row == parseInt(s / 10))
                ){
-                   var change = p4_make_move(state, s, e, P4_QUEEN);
+                   var change = p4_make_move(state, s, e, 12);
                    if (! p4_check_check(state, colour))
                        possibilities.push(s);
                    p4_unmake_move(state, change);
@@ -1552,43 +1487,44 @@ function p4_find_source_point(state, e, str){
     return possibilities[0];
 }
  
-function p4_random_seed(state, seed){
-    seed &= 0xffffffff;
-    state.rng = (P4_USE_TYPED_ARRAYS) ? new Uint32Array(4) : [];
-    state.rng[0] = 0xf1ea5eed;
-    state.rng[1] = seed;
-    state.rng[2] = seed;
-    state.rng[3] = seed;
-    for (var i = 0; i < 20; i++)
-        p4_random31(state);
+function rs(r,n){
+	n&=4294967295;
+	r.rng=P4_USE_TYPED_ARRAYS?new Uint32Array(4):[];
+	r.rng[0]=4058668781;
+	r.rng[1]=n;
+	r.rng[2]=n;
+	r.rng[3]=n;
+	for(var g=0;g<20;g++)
+		rd(r)
 }
 
-function p4_random31(state){
-    var rng = state.rng;
-    var b = rng[1];
-    var c = rng[2]; 
-    var e = rng[0] - ((b << 27) | (b >>> 5));
-    rng[0] = b ^ ((c << 17) | (c >>> 15));
-    rng[1] = (c + rng[3]) & 0xffffffff;
-    rng[2] = (rng[3] + e) & 0xffffffff;
-    rng[3] = (e + rng[0]) & 0xffffffff;
-    return rng[3] & 0x7fffffff;
+function rd(t){
+    var r = t.rng;
+    var b = r[1];
+    var c = r[2]; 
+    var e = r[0] - ((b << 27) | (b >>> 5));
+    r[0] = b ^ ((c << 17) | (c >>> 15));
+    r[1] = (c + r[3]) & 0xffffffff;
+    r[2] = (r[3] + e) & 0xffffffff;
+    r[3] = (e + r[0]) & 0xffffffff;
+    return r[3] & 0x7fffffff;
 }
 
-function p4_random_int(state, top){ 
-    var mask = top;
-    mask--;
-    mask |= mask >>> 1;
-    mask |= mask >>> 2;
-    mask |= mask >>> 4;
-    mask |= mask >>> 8;
-    mask |= mask >>> 16;
+function rdi(s, t){ 
+    var m = t;
+    m--;
+    m |= m >>> 1;
+    m |= m >>> 2;
+    m |= m >>> 4;
+    m |= m >>> 8;
+    m |= m >>> 16;
     var r;
     do{
-        r = p4_random31(state) & mask;
-    } while (r >= top);
+        r = rd(s) & m;
+    } while (r >= t);
     return r;
 } 
+
 p4wnify("b").next_move();
 </script>
 </body>
